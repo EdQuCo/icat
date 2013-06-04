@@ -44,7 +44,7 @@ class ActivityCountsController < ApplicationController
     user = User.find_by_username(params[:username])
 
     if user.nil?
-      user = User.create!(params[:username])
+      user = User.create!(:username => params[:username])
     end
 
     #render :text => response_body
