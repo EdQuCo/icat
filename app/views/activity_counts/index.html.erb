@@ -1,0 +1,21 @@
+<h1>Listing activity_counts</h1>
+
+<table>
+  <tr>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @activity_counts.each do |activity_count| %>
+  <tr>
+    <td><%= link_to 'Show', activity_count %></td>
+    <td><%= link_to 'Edit', edit_activity_count_path(activity_count) %></td>
+    <td><%= link_to 'Destroy', activity_count, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Activity count', new_activity_count_path %>
