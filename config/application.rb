@@ -60,5 +60,7 @@ module Icat
     config.assets.version = '1.0'
 
     config.autoload_paths << File.join(Rails.root, 'app', 'classes')
+
+    config.assets.initialize_on_precompile = false
   end
 end
