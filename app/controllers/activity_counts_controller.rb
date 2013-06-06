@@ -90,6 +90,7 @@ class ActivityCountsController < ApplicationController
               :date => node['date'],
               :counts => node['counts'],
               :epoch => node['epoch'],
+              #:epoch => 60,
               :charging => node['charging'])
 
           # Save ActivityCount
@@ -206,29 +207,38 @@ class ActivityCountsController < ApplicationController
         if bout_size.blank?
           bout_size = 10
         end
+        bout_queue = Array.new(bout_size, -1)
 
+        calories_algorithm = json['calories_algorithm']
+        if calories_algorithm.blank?
+          calories_algorithm = 'WILLIAMS98'
+        end
+
+        bmi = json['bmi']
+        if bmi.blank?
+          bmi = 25
+        end
+
+        # Create the Cut Point ranges
         intensities = []
         if json.keys.include?('cut-point-ranges')
           ranges = json.fetch('cut-point-ranges')
-
-          # Create the Cut Point ranges
-
           min = 0
           ranges.each do |intensity|
             max = intensity['max']
-            intensities << Intensity.new(intensity['intensity'], min, max)
+            intensities << Intensity.new(intensity['name'], min, max)
             min = intensity['max'] + 1
           end
         else
-          intensities << Intensity.new('sedentary', 0, 99)
-          intensities << Intensity.new('light', 100, 1951)
-          intensities << Intensity.new('moderate', 1952, 5724)
-          intensities << Intensity.new('hard', 5725, 99999)
+          cut_point_set = json['cut-point-set']
+          if cut_point_set.blank?
+            cut_point_set = 'DEFAULT'
+          end
+          intensities = ActivityUtil.build_intensities cut_point_set
         end
 
         # Initiate variables
         total_counts = 0
-        total_calories = 0
         off_time = 0
         nonwear_time = 0
         date = start_date
@@ -239,7 +249,7 @@ class ActivityCountsController < ApplicationController
         # iterate through activity counts
         activity_counts.each do |activity_count|
           off_time += (activity_count.date - date).round / 1.minute
-          puts "Comparing #{activity_count.date} vs #{date}: OFF TIME: #{off_time}"
+          #puts "Comparing #{activity_count.date} vs #{date}: OFF TIME: #{off_time}"
 
           counts = activity_count.counts
 
@@ -250,14 +260,14 @@ class ActivityCountsController < ApplicationController
           if activity_count.charging
             nonwear_time += 1
           else
-
-          end
-
-          intensities.each do |intensity|
-            if intensity.in_range?(counts)
-              intensity.add_counts(counts)
-              puts "this count: #{activity_count.date} (#{activity_count.counts}) belongs to #{intensity.name}"
-              break
+            intensities.each_with_index do |intensity, index|
+              if intensity.in_range?(counts)
+                intensity.add_counts(counts)
+                intensity.add_time(1)
+                intensity.add_calories(ActivityUtil.compute_calories calories_algorithm, counts, bmi)
+                #puts "this count: #{activity_count.date} (#{activity_count.counts}) belongs to #{intensity.name}"
+                break
+              end
             end
           end
 
@@ -265,36 +275,38 @@ class ActivityCountsController < ApplicationController
           date = activity_count.date + 1.minute
         end
 
-        off_time += (end_date - date).round / 1.minute
+        #puts ActivityUtil.compute_epoch_sleep_score activity_counts, 0, 'COLE_KRIPKE'
 
+=begin
         intensities.each do |intensity|
           puts "name: #{intensity.name}, counts: #{intensity.counts}, bouts: #{intensity.bouts}, minutes: #{intensity.time}"
         end
+=end
 
-        algorithm = json['calories_algorithm']
-        total_calories = Util.compute_calories total_counts, algorithm
-
-        puts total_calories
+        total_time = (end_date - start_date).round / 1.minute
+        off_time += (end_date - date).round / 1.minute
+        total_calories = ActivityUtil.compute_calories calories_algorithm, total_counts, bmi
 
         #Util.compute_sleep_score activity_counts, start_date, end_date
-        render json: {:total_counts => total_counts,
-                      :total_calories => total_calories,
-                      :nonwear_time => nonwear_time,
-                      :off_time => off_time,
-                      :intensities => intensities.map { |intensity| {
-                          :name => intensity.name,
-                          :counts => intensity.counts,
-                          :time => intensity.time,
-                          :bouts => intensity.bouts,
-                          :calories => intensity.calories
-                      }},
-                      :code => 200,
-                      :message => 'OK',
-                      :start_date => start_date.to_formatted_s(:db),
-                      :end_date => end_date.to_formatted_s(:db)
-        }
-
-        #render json: {:icat_status => 200, :message => 'Message', :counts => activity_counts.as_json}, :status => 200
+        render json: {
+            :username => username,
+            :start_date => start_date.to_formatted_s(:db),
+            :end_date => end_date.to_formatted_s(:db),
+            :total_time => total_time,
+            :total_counts => total_counts,
+            :total_calories => total_calories,
+            :intensities => intensities.map { |intensity| {
+                :name => intensity.name,
+                :counts => intensity.counts,
+                :time => intensity.time,
+                :bouts => intensity.bouts,
+                :calories => intensity.calories
+            } },
+            :nonwear_time => nonwear_time,
+            :off_time => off_time,
+            :code => 200,
+            :message => 'OK'
+        }, :status => 200
       end
 
     else

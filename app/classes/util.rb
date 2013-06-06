@@ -1,7 +1,5 @@
 class Util
-
-
-
+=begin
   def self.compute_sleep_score(activity_counts, start_date, end_date)
     activity_counts.each do |activity_count|
       puts activity_count.date
@@ -16,12 +14,17 @@ class Util
         end
       end
     end
-
-
-
   end
+=end
 
-  def self.compute_calories(counts, algorithm)
-    counts * 2
+=begin
+  def self.compute_calories(equation, cpm, bmi)
+    case equation
+      when 'WILLIAMS98'
+        cpm * 0.0000191 * bmi
+      else
+        -1
+    end
   end
+=end
 end

@@ -1,5 +1,5 @@
 class Intensity
-  attr_accessor :name, :min, :max, :time, :calories, :counts, :bouts
+  attr_accessor :name, :min, :max, :time, :calories, :counts, :bouts, :in_bout
 
   def initialize(name, min, max)
     @name = name
@@ -25,6 +25,10 @@ class Intensity
 
   def add_bouts
     @bouts += 1
+  end
+
+  def reset_bout
+    @in_bout = 0
   end
 
   def in_range?(counts)
