@@ -53,8 +53,10 @@ class ActivityCountsController < ApplicationController
         render json: {:icat_status => 401, :message => 'Must specify additional JSON parameters: api_key'}, :status => 400
         return
       else
-        #TODO Match API-key
-        # if wrong api key, raise icat_error x
+        if api_key != 'iCAT-2013-1234567890'
+          render json: {:icat_status => 404, :message => 'Wrong API-Key'}, :status => 400
+          return
+        end
       end
 
       # Validate username
@@ -85,13 +87,22 @@ class ActivityCountsController < ApplicationController
         # Insert each activity count
         counts = json.fetch('activity_counts')
         counts.each do |node|
+          epoch = node['epoch']
+          if epoch.blank?
+            epoch = 60
+          end
+
+          charging = node['charging']
+          if charging.blank?
+            charging = false
+          end
+
           # Create ActivityCount object
           activity_count = user.activity_counts.new(
               :date => node['date'],
               :counts => node['counts'],
-              :epoch => node['epoch'],
-              #:epoch => 60,
-              :charging => node['charging'])
+              :epoch => epoch,
+              :charging => charging)
 
           # Save ActivityCount
           begin
@@ -104,13 +115,10 @@ class ActivityCountsController < ApplicationController
         render json: {:icat_status => status, :message => message}, :status => 200
       else
         render json: {:icat_status => 401, :message => 'Must specify additional JSON parameters: activity_counts'}, :status => 400
-        #return
       end
     else
       render json: {:icat_status => 400, :message => 'Must specify additional parameters: bundle'}, :status => 400
     end
-
-    #render json: {:counts => activity_counts.as_json(:only => [:charging]), :total_counts => total_counts, :total_calories => total_calories, :nonwear_time => nonwear_time, :code => off_time}
   end
 
   # PUT /activity_counts/1
