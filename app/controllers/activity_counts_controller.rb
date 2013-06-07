@@ -43,18 +43,18 @@ class ActivityCountsController < ApplicationController
       begin
         json = JSON.parse(params[:bundle])
       rescue => ex
-        render json: {:icat_status => 402, :message => "JSON Parse error. Details: #{ex}"}, :status => 400
+        render json: {:icat_status => 402, :message => "JSON Parse error. Details: #{ex}"}
         return
       end
 
       # Validate API-key
       api_key = json['api_key']
       if api_key.blank?
-        render json: {:icat_status => 401, :message => 'Must specify additional JSON parameters: api_key'}, :status => 400
+        render json: {:icat_status => 401, :message => 'Must specify additional JSON parameters: api_key'}
         return
       else
         if api_key != 'iCAT-2013-1234567890'
-          render json: {:icat_status => 404, :message => 'Wrong API-Key'}, :status => 400
+          render json: {:icat_status => 404, :message => 'Wrong API-Key'}
           return
         end
       end
@@ -62,7 +62,7 @@ class ActivityCountsController < ApplicationController
       # Validate username
       username = json['username']
       if username.blank?
-        render json: {:icat_status => 401, :message => 'Must specify additional JSON parameters: username'}, :status => 400
+        render json: {:icat_status => 401, :message => 'Must specify additional JSON parameters: username'}
         return
       end
 
@@ -112,12 +112,12 @@ class ActivityCountsController < ApplicationController
             message = "Unable to create one or more ActivityCount records. Last error: #{ex}"
           end
         end
-        render json: {:icat_status => status, :message => message}, :status => 200
+        render json: {:icat_status => status, :message => message}
       else
-        render json: {:icat_status => 401, :message => 'Must specify additional JSON parameters: activity_counts'}, :status => 400
+        render json: {:icat_status => 401, :message => 'Must specify additional JSON parameters: activity_counts'}
       end
     else
-      render json: {:icat_status => 400, :message => 'Must specify additional parameters: bundle'}, :status => 400
+      render json: {:icat_status => 400, :message => 'Must specify additional parameters: bundle'}
     end
   end
 
