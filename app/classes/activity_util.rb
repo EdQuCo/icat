@@ -84,19 +84,58 @@ class ActivityUtil
 
   end
 
-  def self.compute_epoch_sleep_score(count_array, epoch_index, algorithm)
+  SS_ALGORITHM_FASTEST = 'FASTEST'
+  SS_ALGORITHM_COLE_KRIPKE = 'COLE_KRIPKE'
+  SS_ALGORITHM_COLE_KRIPKE_NO_RS = 'COLE_KRIPKE_NO_RS'
+
+  SLEEP_THRESHOLD = 5
+
+  # 0 -> Wake, 1-> Sleep
+=begin
+  def self.compute_epoch_sleep_score(count_array, epoch_index, algorithm, sleep_threshold)
     case algorithm
-      when 'COLE_KRIPKE'
+      when SS_ALGORITHM_COLE_KRIPKE || SS_ALGORITHM_COLE_KRIPKE_NO_RS
+        # D = 0.00001(404 * A_(-4) + 598 * A_(-3) + 326 * A_(-2) + 441 * A_(-1) + 1408 * A_0 + 508 * A_(+1) + 350 * A_(+2))
         if true
-          puts "#{count_array[epoch_index - 4].counts} - #{count_array[epoch_index - 3].counts} - #{count_array[epoch_index - 2].counts} - #{count_array[epoch_index - 1].counts} - #{count_array[epoch_index].counts} - #{count_array[epoch_index + 1].counts} - #{count_array[epoch_index + 2].counts}"
-        0.00001 * (404 * count_array[epoch_index - 4].counts +
-            598 * count_array[epoch_index - 3].counts +
-            326 * count_array[epoch_index - 2].counts +
-            441 * count_array[epoch_index - 1].counts +
-            1408 * count_array[epoch_index].counts +
-            508 * count_array[epoch_index + 1].counts +
-            350 * count_array[epoch_index + 2].counts)
+          #puts "#{count_array[epoch_index - 4].counts} - #{count_array[epoch_index - 3].counts} - #{count_array[epoch_index - 2].counts} - #{count_array[epoch_index - 1].counts} - #{count_array[epoch_index].counts} - #{count_array[epoch_index + 1].counts} - #{count_array[epoch_index + 2].counts}"
+          0.00001 * (404 * count_array[epoch_index - 4].counts +
+              598 * count_array[epoch_index - 3].counts +
+              326 * count_array[epoch_index - 2].counts +
+              441 * count_array[epoch_index - 1].counts +
+              1408 * count_array[epoch_index].counts +
+              508 * count_array[epoch_index + 1].counts +
+              350 * count_array[epoch_index + 2].counts) >= 1 ? 0 : 1
         end
+      when SS_ALGORITHM_FASTEST
+        count_array[epoch_index].counts > sleep_threshold ? 0 : 1
+      else
+        0
+    end
+  end
+=end
+
+  def self.compute_epoch_sleep_score(epoch_queue, main_index, algorithm, sleep_threshold)
+    # if some value in the queue is invalid (off|nonwear) score as wake
+    if epoch_queue.find_all{|item| !item.valid}.size > 0
+      puts 'invalid'
+      return 0
+    end
+
+    case algorithm
+      when SS_ALGORITHM_COLE_KRIPKE || SS_ALGORITHM_COLE_KRIPKE_NO_RS
+        # D = 0.00001(404 * A_(-4) + 598 * A_(-3) + 326 * A_(-2) + 441 * A_(-1) + 1408 * A_0 + 508 * A_(+1) + 350 * A_(+2))
+        if true
+          #puts "#{count_array[epoch_index - 4].counts} - #{count_array[epoch_index - 3].counts} - #{count_array[epoch_index - 2].counts} - #{count_array[epoch_index - 1].counts} - #{count_array[epoch_index].counts} - #{count_array[epoch_index + 1].counts} - #{count_array[epoch_index + 2].counts}"
+          0.00001 * (404 * epoch_queue[main_index - 4].counts +
+              598 * epoch_queue[main_index - 3].counts +
+              326 * epoch_queue[main_index - 2].counts +
+              441 * epoch_queue[main_index - 1].counts +
+              1408 * epoch_queue[main_index].counts +
+              508 * epoch_queue[main_index + 1].counts +
+              350 * epoch_queue[main_index + 2].counts) >= 1 ? 0 : 1
+        end
+      when SS_ALGORITHM_FASTEST
+        epoch_queue[main_index].counts > sleep_threshold ? 0 : 1
       else
         0
     end

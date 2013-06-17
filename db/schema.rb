@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130606025051) do
+ActiveRecord::Schema.define(:version => 20130615023331) do
 
   create_table "activity_counts", :force => true do |t|
     t.integer  "user_id",                                  :null => false
@@ -23,6 +23,19 @@ ActiveRecord::Schema.define(:version => 20130606025051) do
 
   add_index "activity_counts", ["user_id", "date"], :name => "ux_user_id_timestamp", :unique => true
   add_index "activity_counts", ["user_id"], :name => "ix_user_id"
+
+  create_table "surveys", :force => true do |t|
+    t.integer  "user_id",                                :null => false
+    t.datetime "date",                                   :null => false
+    t.integer  "question_1", :limit => 2, :default => 5, :null => false
+    t.integer  "question_2", :limit => 2, :default => 3, :null => false
+    t.integer  "question_3", :limit => 2, :default => 3, :null => false
+    t.integer  "question_4", :limit => 2, :default => 3, :null => false
+    t.integer  "question_5", :limit => 2, :default => 3, :null => false
+  end
+
+  add_index "surveys", ["user_id", "date"], :name => "ux_surveys_user_id_date", :unique => true, :order => {"date"=>:desc}
+  add_index "surveys", ["user_id"], :name => "ix_surveys_user_id"
 
   create_table "users", :force => true do |t|
     t.string "username", :limit => 30, :null => false

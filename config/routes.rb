@@ -56,15 +56,31 @@ Icat::Application.routes.draw do
   # Note: This route will make all actions in every controller accessible via GET requests.
   # match ':controller(/:action(/:id))(.:format)'
 
+=begin
   resources :users do
     get :find, :on => :collection
   end
+=end
   #post "activity_counts/create"
+=begin
   resources :activity_counts do
     post :query, :on => :collection
+    post :query_sleep_score, :on => :collection
   end
+=end
+  #resources :surveys do
+  #  post :query, :on => :collection
+  #end
   #
   #end
   #get "users/find"
   #post 'users/query_username'
+  #
+
+  match '/activity_counts' => 'activity_counts#create'
+  post '/activity_counts/query'
+  post '/activity_counts/query_sleep_score'
+
+  match '/surveys' => 'surveys#create'
+  post '/surveys/query'
 end

@@ -42,3 +42,5 @@ gem 'activerecord-import'
 
 # To use debugger
 # gem 'debugger'
+
+gem 'newrelic_rpm'
