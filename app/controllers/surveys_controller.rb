@@ -77,86 +77,31 @@ class SurveysController < ApplicationController
 
   # POST /surveys/query.json
   def query
-    if params.has_key?(:bundle)
-      begin
-        json = JSON.parse(params[:bundle])
-      rescue => ex
-        render json: {:icat_status => 402, :message => "JSON Parse error. Details: #{ex}"}, :status => 400
-        return
-      end
+    validation = Util.validate params
+    if validation[0]
+      json = validation[1]
+      user = validation[2]
+      start_date = validation[3]
+      end_date = validation[4]
 
-      # Validate API-key
-      api_key = json['api_key']
-      if api_key.blank?
-        render json: {:icat_status => 401, :message => 'Must specify additional JSON parameters: api_key'}, :status => 400
-        return
-      else
-        #TODO Match API-key
-        # if wrong api key, raise icat_error x
-      end
+      # Query surveys inside date range
+      surveys = user.surveys.where(:date => start_date..end_date)
+      #surveys_taken = surveys.where('question_1 != -1')
 
-      # Validate username
-      username = json['username']
-      if username.blank?
-        render json: {:icat_status => 401, :message => 'Must specify additional JSON parameters: username'}, :status => 400
-        return
-      end
-
-      user = User.find_by_username(username)
-      # If user does not exist
-      if user.nil?
-        render json: {:icat_status => 403, :message => "User #{username} does not exist"}, :status => 400
-        return
-      else
-        start_date = json['start_date']
-        if start_date.blank?
-          render json: {:icat_status => 401, :message => 'Must specify additional JSON parameters: start_date'}, :status => 400
-          return
-        else
-          begin
-            start_date = DateTime.parse(start_date).to_time
-          rescue => ex
-            render json: {:icat_status => 402, :message => "JSON Parse error. Details: #{ex}"}, :status => 400
-            return
-          end
-        end
-
-        end_date = json['end_date']
-        if end_date.blank?
-          render json: {:icat_status => 401, :message => 'Must specify additional JSON parameters: end_date'}, :status => 400
-          return
-        else
-          begin
-            end_date = DateTime.parse(end_date).to_time
-          rescue => ex
-            render json: {:icat_status => 402, :message => "JSON Parse error. Details: #{ex}"}, :status => 400
-            return
-          end
-        end
-
-        # Query surveys inside date range
-        surveys = user.surveys.where(:date => start_date..end_date)
-
-        # TODO: Fix date format
-        render json: {
-            :username => username,
-            :start_date => start_date.to_formatted_s(:db),
-            :end_date => end_date.to_formatted_s(:db),
-            :surveys => surveys.as_json(:except => [:id, :user_id]),
-            #:surveys => surveys.map { |survey| {
-            #    :name => intensity.name,
-            #    :counts => intensity.counts,
-            #    :time => intensity.time,
-            #    :bouts => intensity.bouts,
-            #    :calories => intensity.calories
-            #} },
-            :code => 200,
-            :message => 'OK'
-        }, :status => 200
-      end
+      render json: {
+          :username => user.username,
+          :start_date => start_date.to_date.to_formatted_s(:db),
+          :end_date => end_date.to_date.to_formatted_s(:db),
+          :surveys => surveys.map { |survey| {
+              :date => survey.date.to_date.to_formatted_s(:db),
+              :score => survey.question_1 + survey.question_2 + survey.question_3 + survey.question_4 + survey.question_5
+          } },
+          :icat_status => 200,
+          :message => 'OK'
+      }, :status => 200
 
     else
-      render json: {:icat_status => 400, :message => 'Must specify additional parameters: bundle'}
+      render json: {:icat_status => validation[1], :message => validation[2]}
     end
   end
 end

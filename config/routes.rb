@@ -80,6 +80,7 @@ Icat::Application.routes.draw do
   match '/activity_counts' => 'activity_counts#create'
   post '/activity_counts/query'
   post '/activity_counts/query_sleep_score'
+  post '/activity_counts/query_calories'
 
   match '/surveys' => 'surveys#create'
   post '/surveys/query'
