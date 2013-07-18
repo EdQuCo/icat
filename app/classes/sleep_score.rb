@@ -1,5 +1,5 @@
 class SleepScore
-  attr_accessor :date, :counts, :valid
+  attr_accessor :date, :counts, :valid, :score
 
   def initialize(date, counts, valid)
     @date = date
