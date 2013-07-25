@@ -35,7 +35,7 @@ gem 'activerecord-import'
 # gem 'jbuilder'
 
 # Use unicorn as the app server
-# gem 'unicorn'
+#gem 'unicorn'
 
 # Deploy with Capistrano
 # gem 'capistrano'
@@ -44,3 +44,6 @@ gem 'activerecord-import'
 # gem 'debugger'
 
 gem 'newrelic_rpm'
+
+#TODO test thin and update Heroku
+gem 'thin'

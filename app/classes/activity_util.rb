@@ -323,3 +323,6 @@ class ActivityUtil
     end
   end
 end
+
+#TODO Change calories computation, add calories when not wearing the device, and maybe opt to use the CPM to METs to calories equation
+#TODO Scale CPM for each user <- This scale value is yet to be computed

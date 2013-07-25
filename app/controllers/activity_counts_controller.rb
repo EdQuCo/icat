@@ -324,7 +324,7 @@ class ActivityCountsController < ApplicationController
             }
           end
 
-          p awakening_time
+          #p awakening_time
           avg_awakening_time = awakenings == 0 ? 0 : awakening_time / awakenings
 
           #puts "Time elapsed #{Time.now - beginning} seconds"
