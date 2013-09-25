@@ -1,5 +1,5 @@
 class Intensity
-  attr_accessor :name, :min, :max, :time, :calories, :counts, :bouts, :in_bout, :index
+  attr_accessor :name, :min, :max, :time, :calories, :counts, :steps, :bouts, :in_bout, :index
 
   def initialize(index, name, min, max)
     @index = index
@@ -7,6 +7,7 @@ class Intensity
     @min = min
     @max = max
     @counts = 0
+    @steps = 0
     @time = 0
     @calories = 0
     @bouts = -1

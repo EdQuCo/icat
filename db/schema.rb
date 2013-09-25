@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130615023331) do
+ActiveRecord::Schema.define(:version => 20130924005412) do
 
   create_table "activity_counts", :force => true do |t|
     t.integer  "user_id",                                  :null => false
@@ -19,6 +19,7 @@ ActiveRecord::Schema.define(:version => 20130615023331) do
     t.integer  "counts",   :limit => 2, :default => 0
     t.integer  "epoch",    :limit => 2, :default => 60
     t.boolean  "charging",              :default => false
+    t.integer  "steps",    :limit => 2, :default => 0
   end
 
   add_index "activity_counts", ["user_id", "date"], :name => "ux_user_id_timestamp", :unique => true
