@@ -22,7 +22,9 @@ class SurveysController < ApplicationController
                   :question_2 => node['question2'],
                   :question_3 => node['question3'],
                   :question_4 => node['question4'],
-                  :question_5 => node['question5'])
+                  :question_5 => node['question5'],
+                  :s_type => Util.get_param(node, 's_type', 0)
+              )
               # save Survey
               begin
                 survey.save
@@ -98,7 +100,7 @@ class SurveysController < ApplicationController
                   #:question_3 => survey.question_3,
                   #:question_4 => survey.question_4,
                   #:question_5 => survey.question_5,
-                  :score => (survey.question_1 / 2).ceil + survey.question_2 + survey.question_3 + survey.question_4 + survey.question_5
+                  #:score => (survey.question_1 / 2).ceil + survey.question_2 + survey.question_3 + survey.question_4 + survey.question_5
               } },
           } },
           :icat_status => 200,

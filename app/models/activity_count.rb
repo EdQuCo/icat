@@ -1,7 +1,7 @@
 class ActivityCount < ActiveRecord::Base
   belongs_to :user
 
-  attr_accessible :date, :counts, :epoch, :charging
+  attr_accessible :date, :counts, :steps, :epoch, :charging
 
   #scope :filter_by_date, lambda { |dates, times|
   #  clauses = []

@@ -19,7 +19,7 @@ class Util
     if api_key.blank?
       return [false].concat StatusCodeUtil.get_error([StatusCodeUtil::CODE_ERROR_ADDITIONAL_JSON, 'api_key'])
     else
-      if api_key != 'iCAT-2013-1234567890'
+      if api_key != 'iCAT-2013-1234567890' && api_key != 'iCAT-ti2013'
         return [false].concat StatusCodeUtil.get_error([StatusCodeUtil::CODE_ERROR_API_KEY])
       end
     end
