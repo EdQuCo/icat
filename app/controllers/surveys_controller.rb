@@ -23,7 +23,7 @@ class SurveysController < ApplicationController
                   :question_3 => node['question3'],
                   :question_4 => node['question4'],
                   :question_5 => node['question5'],
-                  :s_type => Util.get_param(node, 's_type', 0)
+                  :s_type => Util.get_param(node, 'type', 0)
               )
               # save Survey
               begin
@@ -59,6 +59,9 @@ class SurveysController < ApplicationController
 
       total_time = (end_date - start_date + 1.day).round / 1.day
 
+      # get survey type
+      s_type = Util.get_param(json, 'type', 0)
+
       # clear invalid users
       users.reject! { |user| !user.valid }
 
@@ -69,12 +72,21 @@ class SurveysController < ApplicationController
         # if user does not exist
         unless user.nil?
           # query surveys inside date range
-          user_response.surveys = user.surveys.where(:date => start_date..end_date).order('date ASC')
+          #user_response.surveys = user.surveys.where(:date => start_date..end_date, :s_type => s_type, :question_1 => ).order('date ASC')
+          user_response.surveys = user.surveys.where(:date => start_date..end_date, :s_type => s_type).order('date ASC')
           surveys_taken = user_response.surveys.where('question_1 != -1')
           user_response.surveys_taken = surveys_taken.count
           user_response.surveys_ignored = total_time - user_response.surveys_taken
 
-          sum = surveys_taken.sum{|s| s.question_1 / 2} + surveys_taken.sum(:question_2) + surveys_taken.sum(:question_3) + surveys_taken.sum(:question_4) + surveys_taken.sum(:question_5)
+          case s_type
+            when 1 then
+              sum = surveys_taken.sum(:question_1) + surveys_taken.sum(:question_2) + surveys_taken.sum(:question_3) + surveys_taken.sum(:question_4)
+            when 2 then
+              sum = surveys_taken.sum(:question_1) + surveys_taken.sum(:question_2)
+            else
+              sum = surveys_taken.sum { |s| s.question_1 / 2 } + surveys_taken.sum(:question_2) + surveys_taken.sum(:question_3) + surveys_taken.sum(:question_4) + surveys_taken.sum(:question_5)
+          end
+
           user_response.avg_score = user_response.surveys_taken == 0 ? -1 : (sum.to_f / user_response.surveys_taken)
         end
       end
