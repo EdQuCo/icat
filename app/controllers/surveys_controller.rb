@@ -23,7 +23,7 @@ class SurveysController < ApplicationController
                   :question_3 => node['question3'],
                   :question_4 => node['question4'],
                   :question_5 => node['question5'],
-                  :s_type => Util.get_param(node, 'type', 0)
+                  :s_type => Util.get_param(json, 'type', 0)
               )
               # save Survey
               begin
