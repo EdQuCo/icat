@@ -282,6 +282,7 @@ class ActivityCountsController < ApplicationController
               #p "sleep onset: first -> #{pairs[0][0].date} with index #{pairs[0][1]}"
               previous_state = ActivityUtil::ASLEEP
               onsets << [previous_state, pairs[0][0].date, pairs[0][1]]
+              #p onsets.as_json
             elsif is_awake && previous_state != ActivityUtil::AWAKE && pairs.length >= wake_onset_threshold
               #p "awake onset: first -> #{pairs[0][0].date} with index #{pairs[0][1]}"
               previous_state = ActivityUtil::AWAKE
@@ -290,7 +291,7 @@ class ActivityCountsController < ApplicationController
           end
 
           # adjust first onset. The onset index will be reset to 0
-          onsets[0][2] = 0 if !onsets.empty?
+          #onsets[0][2] = 0 if !onsets.empty?
           #p onsets.as_json
 
           # find awakenings
@@ -303,22 +304,31 @@ class ActivityCountsController < ApplicationController
           #p "From #{first_asleep_onset} to #{onsets.length}"
           unless first_asleep_onset.nil?
             onsets[first_asleep_onset..onsets.length].each_with_index { |onset, i|
-              #p "checking onset with index #{i}"
+              #p "checking onset with index #{i}, onset: #{onset.inspect}"
               if onset[0] == ActivityUtil::ASLEEP
                 begin_index = onset[2]
               else
                 end_index = onset[2] - 1
               end
 
+              #p 'indexes: ' + begin_index.to_s + '-' + end_index.to_s
+
               last_index = i == onsets.length - first_asleep_onset - 1
 
-              if begin_index != -1 && ((end_index != -1 && begin_index < end_index) || last_index)
+              #p 'last_index: ' + last_index.to_s
+
+              #if begin_index != -1 && ((end_index != -1 && begin_index < end_index) || (last_index && onset[0] == ActivityUtil::ASLEEP))
+              #p begin_index != -1
+              #p end_index != -1 && begin_index < end_index
+              #p onset[0] == ActivityUtil::ASLEEP
+              if begin_index != -1 && ((end_index != -1 && begin_index < end_index) || (last_index && onset[0] == ActivityUtil::ASLEEP))
                 #p "something at begin_index #{begin_index} and end_index #{end_index}"
-                end_index = sleep_scores.length if last_index
+                end_index = sleep_scores.length if last_index && onset[0] == ActivityUtil::ASLEEP
                 #p "From #{begin_index} to #{end_index}"
                 sub_sleep_scores = sleep_scores[begin_index..end_index]
                 #p "Sleep += #{sub_sleep_scores.length}"
                 asleep_time += sub_sleep_scores.length
+                #p asleep_time.to_s + ' indexes: ' + begin_index.to_s + '-' + end_index.to_s
                 sub_sleep_scores.chunk { |sleep_score|
                   sleep_score.score == 0
                 }.each { |is_awake, ary|
@@ -352,7 +362,8 @@ class ActivityCountsController < ApplicationController
           #user_response.total_sleep_time = sleep_scores.inject(0) { |sum, e| sum += e.score }
           user_response.asleep_time = asleep_time
           #p "#{total_time} -> #{user_response.total_sleep_time} -> #{user_response.off_time}"
-          user_response.awake_time = total_time - user_response.asleep_time - user_response.off_time
+          user_response.awake_time = total_time - user_response.asleep_time
+          #- user_response.off_time #TODO Revise whether we should consider 'off' as awake or asleep
 
           user_response.onsets = onsets
         end
