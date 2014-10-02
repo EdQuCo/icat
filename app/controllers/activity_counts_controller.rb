@@ -21,7 +21,7 @@ class ActivityCountsController < ApplicationController
             activity_counts.each do |node|
               epoch = Util.get_param(node, 'epoch', 60)
               charging = Util.get_param(node, 'charging', false)
-              steps = Util.get_param(node, 'steps', 0)
+              # steps = Util.get_param(node, 'steps', 0)
 
               inserts.push "(#{user.id}, '#{node['date']}', #{node['counts']}, #{epoch}, '#{charging}', '#{steps}')"
             end
@@ -134,13 +134,13 @@ class ActivityCountsController < ApplicationController
           user_response.intensities.each do |intensity|
             counts_in_range = activity_counts.where(:charging => 'false', :counts => intensity.min..intensity.max)
             intensity.counts = counts_in_range.sum(:counts)
-            intensity.steps = counts_in_range.sum(:steps)
+            # intensity.steps = counts_in_range.sum(:steps)
             intensity.time = counts_in_range.count()
             intensity.calories = ActivityUtil.compute_calories(calories_algorithm, intensity.counts, user_response.bmi, calories_scale)
           end
 
           user_response.total_counts = activity_counts.sum(:counts)
-          user_response.total_steps = activity_counts.sum(:steps)
+          # user_response.total_steps = activity_counts.sum(:steps)
           user_response.on_time = activity_counts.count()
           user_response.nonwear_time = activity_counts.count(:conditions => 'charging = true')
           user_response.wear_time = user_response.on_time - user_response.nonwear_time
@@ -156,20 +156,20 @@ class ActivityCountsController < ApplicationController
           :total_time => total_time,
           :avg_counts => (users.empty? ? 0 : (users.sum(&:total_counts) / users.count())).ceil,
           :avg_calories => (users.empty? ? 0 : (users.sum(&:total_calories) / users.count())).ceil,
-          :avg_steps => (users.empty? ? 0 : (users.sum(&:total_steps) / users.count())).ceil,
+          # :avg_steps => (users.empty? ? 0 : (users.sum(&:total_steps) / users.count())).ceil,
           :users => users.map { |user| {
               :username => user.username,
               :bmi => user.bmi,
               :total_counts => user.total_counts,
               :total_calories => user.total_calories.ceil,
-              :total_steps => user.total_steps,
+              # :total_steps => user.total_steps,
               :intensities => user.intensities.map { |intensity| {
                   :name => intensity.name,
                   :counts => intensity.counts,
                   :time => intensity.time,
                   :bouts => intensity.bouts,
                   :calories => intensity.calories.ceil,
-                  :steps => intensity.steps
+                  # :steps => intensity.steps
               } },
               :wear_time => user.wear_time,
               :nonwear_time => user.nonwear_time,
@@ -434,7 +434,7 @@ class ActivityCountsController < ApplicationController
           activity_counts = user.activity_counts.where(:date => start_date..end_date)
 
           user_response.total_counts = activity_counts.sum(:counts)
-          user_response.total_steps = activity_counts.sum(:steps)
+          # user_response.total_steps = activity_counts.sum(:steps)
           user_response.on_time = activity_counts.count()
           user_response.nonwear_time = activity_counts.count(:conditions => 'charging = true')
           user_response.wear_time = user_response.on_time - user_response.nonwear_time
@@ -450,13 +450,13 @@ class ActivityCountsController < ApplicationController
           :total_time => total_time,
           :avg_counts => (users.empty? ? 0 : (users.sum(&:total_counts) / users.count())).ceil,
           :avg_calories => (users.empty? ? 0 : (users.sum(&:total_calories) / users.count())).ceil,
-          :avg_steps => (users.empty? ? 0 : (users.sum(&:total_steps) / users.count())).ceil,
+          # :avg_steps => (users.empty? ? 0 : (users.sum(&:total_steps) / users.count())).ceil,
           :users => users.map { |user| {
               :username => user.username,
               :bmi => '%0.2f' % user.bmi,
               :total_counts => user.total_counts,
               :total_calories => user.total_calories.ceil,
-              :total_steps => user.total_steps,
+              # :total_steps => user.total_steps,
               :wear_time => user.wear_time,
               :nonwear_time => user.nonwear_time,
               :off_time => user.off_time,

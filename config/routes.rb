@@ -78,9 +78,9 @@ Icat::Application.routes.draw do
   #
 
   match '/activity_counts' => 'activity_counts#create'
-  post '/activity_counts/query'
-  post '/activity_counts/query_sleep_score'
-  post '/activity_counts/query_calories'
+  get '/activity_counts/query'
+  get '/activity_counts/query_sleep_score'
+  get '/activity_counts/query_calories'
 
   match '/surveys' => 'surveys#create'
   post '/surveys/query'
